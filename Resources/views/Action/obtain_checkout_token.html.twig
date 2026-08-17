@@ -1,0 +1,17 @@
+{% extends layout ?: "@PayumCore/layout.html.twig" %}
+
+{% block payum_body %}
+    {{ parent() }}
+    <form method="POST" action="{{ checkout_url }}" accept-charset="utf-8" id="postForm">
+        <input type="hidden" name="data" value="{{ data }}">
+        <input type="hidden" name="signature" value="{{ signature }}">
+    </form>
+{% endblock %}
+
+{% block payum_javascripts %}
+    {{ parent() }}
+
+    <script type="text/javascript">
+        document.getElementById('postForm').submit();
+    </script>
+{% endblock %}

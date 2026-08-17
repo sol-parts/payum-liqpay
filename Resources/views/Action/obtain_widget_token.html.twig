@@ -1,0 +1,46 @@
+{% extends layout ?: "@PayumCore/layout.html.twig" %}
+
+{% block payum_body %}
+    {{ parent() }}
+    <div id="liqpay_widget"></div>
+
+    <div id="wrap-loading" style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+        <div style="text-align: center;">{{ 'Loading…'|trans({}, 'payum_liqpay') }}</div>
+    </div>
+
+    <form id="postForm" method="post" action="{{ result_url }}">
+        <input type="hidden" name="data" id="dataField" value="">
+        <input type="hidden" name="signature" id="signatureField" value="">
+    </form>
+{% endblock %}
+
+
+{% block payum_vendor_javascripts %}
+    {{ parent() }}
+    <script src="https://static.liqpay.ua/libjs/checkout.js" async></script>
+{% endblock %}
+
+{% block payum_javascripts %}
+    {{ parent() }}
+
+    <script type="text/javascript">
+        window.LiqPayCheckoutCallback = function () {
+            LiqPayCheckout.init({
+                data: '{{ data|e('js') }}',
+                signature: '{{ signature|e('js') }}',
+                embedTo: '#liqpay_widget',
+                language: '{{ language|e('js') }}',
+                mode: 'embed'
+            }).on('liqpay.callback', function (data) {
+                setTimeout(() => {
+                    document.getElementById('dataField').value = data.notify?.data ?? data.data;
+                    document.getElementById('signatureField').value = data.notify?.signature ?? data.signature;
+                    document.getElementById('postForm').submit();
+                }, 3000);
+            }).on('liqpay.ready', function (data) {
+                document.getElementById('wrap-loading').style.display = 'none';
+            }).on('liqpay.close', function (data) {
+            });
+        };
+    </script>
+{% endblock %}
